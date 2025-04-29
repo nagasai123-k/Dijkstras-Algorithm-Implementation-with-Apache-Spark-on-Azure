@@ -1,150 +1,102 @@
-# Dijkstra's Algorithm Implementation with Apache Spark on Azure
+# Spark-Based Dijkstra's Algorithm on Azure
 
-## Project Overview
+## Overview
 
-This project implements Dijkstra's shortest path algorithm using Apache Spark in a standalone deployment on Microsoft Azure. The implementation finds the shortest paths from a source node to all other nodes in a weighted graph, leveraging Spark's distributed computing capabilities.
+This project showcases a distributed computing approach to finding shortest paths in large graphs. Using Apache Spark's parallel processing capabilities on an Azure cloud platform, we implement the classic Dijkstra's algorithm to calculate optimal routes from a starting node to all other nodes in a weighted network.
 
-## Features
+## Key Capabilities
 
-- Implementation of Dijkstra's algorithm using Spark RDDs (Resilient Distributed Datasets)
-- Support for large graphs (tested with 10,000 nodes, 100,000 edges)
-- Standalone Spark deployment on Azure VM
-- Early convergence detection for performance optimization
-- Automatic output file generation
+- Spark RDD framework for distributed graph processing
+- Optimized for large-scale networks (successfully tested on 10K nodes/100K edges)
+- Smart convergence detection to minimize processing time
+- Streamlined I/O with automatic result generation
+- Lightweight deployment on cost-effective Azure infrastructure
 
-## Requirements
+## System Requirements
 
-- Azure account for VM deployment
-- JDK 11
+- Active Azure subscription
+- Java Development Kit 11
 - Apache Spark 3.4.1
-- Python 3
-- PySpark
+- Python 3 with PySpark package
 
-## Project Files
+## File Structure
 
 ```
-dijkstra-spark/
-├── dijkstra_spark.py       # Python implementation using Spark RDDs
-├── weighted_graph.txt      # Input graph file in edge list format
-└── README.md               # This file
+project-directory/
+├── dijkstra_spark.py       # Main algorithm implementation 
+├── weighted_graph.txt      # Graph data in edge list format
+└── README.md               # Documentation
 ```
 
-## Setup Instructions
+## Azure Environment Configuration
 
-### 1. Azure VM Setup
+### Creating Your Cloud Server
 
-A lightweight Azure VM configuration was used for this implementation:
+Our implementation runs on a modest Azure virtual machine:
 
-#### VM Configuration:
-- **Size**: Standard B2s (2 vCPUs, 4 GB RAM)
-- **Operating System**: Ubuntu Server 22.04 LTS
-- **Authentication**: SSH public key
-- **Networking**: Allow SSH (port 22)
+**VM Specifications:**
+- Type: Standard B2s with 2 vCPUs and 4GB memory
+- OS: Ubuntu Server 22.04 LTS
+- Security: SSH key authentication
+- Network: Basic SSH connectivity (port 22)
 
-#### Using Azure Portal:
+### Software Installation
 
-1. Log in to the [Azure Portal](https://portal.azure.com)
-2. Click "Create a resource" > "Compute" > "Virtual Machine"
-3. Configure the VM with the specifications above
-
-#### Using Azure CLI:
+After connecting to your VM, set up the required software:
 
 ```bash
-# Login to Azure
-az login
-
-# Create a resource group
-az group create --name dijkstraSparkRG --location eastus
-
-# Create VM
-az vm create \
-  --resource-group dijkstraSparkRG \
-  --name spark-server \
-  --image UbuntuLTS \
-  --admin-username azureuser \
-  --generate-ssh-keys \
-  --size Standard_B2s
-
-# Open SSH port
-az vm open-port --resource-group dijkstraSparkRG --name spark-server --port 22
-```
-
-### 2. Environment Setup
-
-Connect to your VM using SSH:
-
-```bash
-ssh -i <private_key.pem> azureuser@<vm_public_ip>
-```
-
-Install necessary dependencies:
-
-```bash
-# Update package lists
+# System updates and core packages
 sudo apt update
-
-# Install OpenJDK 11, Scala, and Python
 sudo apt install openjdk-11-jdk scala python3-pip -y
 
-# Verify installations
+# Confirm successful installation
 java -version
 scala -version
 python3 --version
 pip3 --version
-```
 
-### 3. Apache Spark Installation
-
-```bash
-# Download Spark 3.4.1
+# Download and install Spark
 wget https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
-
-# Extract Spark
 tar -xvzf spark-3.4.1-bin-hadoop3.tgz
-
-# Move Spark to /opt
 sudo mv spark-3.4.1-bin-hadoop3 /opt/spark
 
-# Set environment variables
+# Configure environment paths
 echo 'export SPARK_HOME=/opt/spark' >> ~/.bashrc
 echo 'export PATH=$SPARK_HOME/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 
-# Install PySpark
+# Install Python Spark interface
 pip3 install pyspark
 ```
 
-### 4. Uploading Project Files
+### Transferring Project Files
 
-From your local machine, upload the Python code and input graph file to the VM:
+Move your code and data from your local machine to the cloud server:
 
 ```bash
-# Set proper permissions for private key
-chmod 400 <private_key.pem>
+# Set key permissions
+chmod 400 yourkeyfile.pem
 
 # Upload files to VM
-scp -i <private_key.pem> dijkstra_spark.py azureuser@<vm_public_ip>:~
-scp -i <private_key.pem> weighted_graph.txt azureuser@<vm_public_ip>:~
+scp -i yourkeyfile.pem dijkstra_spark.py username@vm-ip-address:~
+scp -i yourkeyfile.pem weighted_graph.txt username@vm-ip-address:~
 ```
 
-Alternatively, you can edit files directly on the VM using an editor like `nano`:
+To make changes directly on the server, use a text editor like nano:
 
 ```bash
 nano dijkstra_spark.py
+# Save with Ctrl+O, Exit with Ctrl+X
 ```
 
-Inside nano:
-- Save changes: `Ctrl + O`, then `Enter`
-- Exit editor: `Ctrl + X`
+## Input Data Format
 
-## Input Format
-
-The input graph should be in the following edge list format:
+The algorithm works with weighted graph data in edge list format:
 
 ```
-num_nodes num_edges
-u1 v1 weight1
-u2 v2 weight2
+total_nodes total_edges
+source1 destination1 weight1
+source2 destination2 weight2
 ...
 ```
 
@@ -159,68 +111,53 @@ Example:
 1 4 2
 ```
 
-## Running the Application
+## Running the Algorithm
 
-To run the Dijkstra's algorithm implementation:
+Execute the implementation with Spark's distributed engine:
 
 ```bash
-spark-submit dijkstra_spark.py weighted_graph.txt <source_node>
+spark-submit dijkstra_spark.py weighted_graph.txt starting_node_id
 ```
 
-Where:
-- `dijkstra_spark.py` is the Python implementation file
-- `weighted_graph.txt` is the input graph file
-- `<source_node>` is the starting node from which shortest paths will be calculated
-
-Example:
+For example:
 ```bash
 spark-submit dijkstra_spark.py weighted_graph.txt 8168
 ```
 
-## Output
+## Results
 
-After successful execution, the program generates an output file with the naming convention:
+The algorithm generates a text file with all shortest path distances:
 ```
-shortest_distances_from_<source_node>.txt
-```
-
-For example:
-```
-shortest_distances_from_8168.txt
+shortest_distances_from_X.txt
 ```
 
-This file contains the computed shortest distances for each node. If a node is unreachable, its distance is marked as `INF`.
+Where X is your specified starting node. Unreachable nodes are marked with "INF".
 
-## Performance Features
+## Optimization Features
 
-The implementation includes several performance optimizations:
+Our implementation includes several performance enhancements:
 
-1. **Full Spark RDD Parallelism**: Leverages Spark's distributed computing capabilities
-   
-2. **Early Convergence Detection**: Stops processing when no more distances can be improved
+1. **Distributed Computation**: Leverages Spark's parallel processing
+2. **Smart Termination**: Stops when no further improvements are possible
+3. **Efficient Memory Usage**: Optimized data structures to minimize memory footprint
+4. **Streamlined I/O**: Fast processing of input and output
 
-3. **Clean Input-Output Handling**: Efficiently reads input and writes output
+## Complete Deployment Example
 
-4. **Memory Optimization**: Keeps only necessary data in memory during computation
-
-## Full Command Sequence Example
-
-Here's a complete example workflow from setting up the VM to running the algorithm:
+Here's the full process from setup to execution:
 
 ```bash
-# On Local Machine
-chmod 400 SparkVM_key.pem
-scp -i SparkVM_key.pem dijkstra_spark.py azureuser@<vm_public_ip>:~
-scp -i SparkVM_key.pem weighted_graph.txt azureuser@<vm_public_ip>:~
+# From your local computer
+chmod 400 your_key.pem
+scp -i your_key.pem dijkstra_spark.py username@vm-ip:~
+scp -i your_key.pem weighted_graph.txt username@vm-ip:~
 
-# SSH into VM
-ssh -i SparkVM_key.pem azureuser@<vm_public_ip>
+# Connect to VM
+ssh -i your_key.pem username@vm-ip
 
-# On VM - Install dependencies
+# On the VM - Setup environment
 sudo apt update
 sudo apt install openjdk-11-jdk scala python3-pip -y
-
-# Install Spark
 wget https://dlcdn.apache.org/spark/spark-3.4.1/spark-3.4.1-bin-hadoop3.tgz
 tar -xvzf spark-3.4.1-bin-hadoop3.tgz
 sudo mv spark-3.4.1-bin-hadoop3 /opt/spark
@@ -229,59 +166,53 @@ echo 'export PATH=$SPARK_HOME/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 pip3 install pyspark
 
-# Run the algorithm
+# Execute algorithm
 spark-submit dijkstra_spark.py weighted_graph.txt 8168
 ```
 
-## Troubleshooting
+## Common Issues & Solutions
 
-Common issues and solutions:
-
-1. **Permission denied when SSH or SCP**:
+1. **SSH Connection Problems**:
    ```bash
-   chmod 600 <private_key.pem>
+   chmod 600 your_key.pem
    ```
 
-2. **Spark not found after setup**:
+2. **Missing Spark Commands**:
    ```bash
    source ~/.bashrc
    ```
 
-3. **Java version issues**: Ensure you're using JDK 11
+3. **Java Configuration Issues**:
    ```bash
-   java -version
+   java -version  # Should show version 11
    ```
 
-4. **Python package not found**: Install any missing packages
+4. **Missing Python Dependencies**:
    ```bash
-   pip3 install <package_name>
+   pip3 install package_name
    ```
 
-5. **File not found errors**: Check paths and file permissions
+5. **File Permission Problems**:
    ```bash
-   ls -la
    chmod +r weighted_graph.txt
    ```
 
-## Implementation Details
+## Technical Implementation
 
-The Python implementation (`dijkstra_spark.py`) uses Spark's RDD API to implement Dijkstra's algorithm in a distributed manner. Key aspects include:
+The `dijkstra_spark.py` script implements the distributed Dijkstra's algorithm with these components:
 
-1. **Graph Representation**: The graph is represented as an adjacency list using RDDs
-
-2. **Distance Tracking**: A distances RDD maintains current shortest paths
-
-3. **Iterative Processing**: The algorithm runs until convergence (no distance updates)
-
-4. **Result Output**: Results are written to a file for easy access
+1. **Graph Structure**: Adjacency list representation via RDDs
+2. **Distance Tracking**: Current shortest paths stored in distributed format
+3. **Iterative Algorithm**: Continues until no further improvement or all reachable nodes visited
+4. **Result Management**: Automated storage of calculated distances
 
 ## References
 
-- [Apache Spark Documentation](https://spark.apache.org/docs/latest/)
-- [PySpark RDD Programming Guide](https://spark.apache.org/docs/latest/rdd-programming-guide.html)
-- [Microsoft Azure Documentation](https://docs.microsoft.com/en-us/azure/)
-- [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
+- [Spark Official Documentation](https://spark.apache.org/docs/latest/)
+- [PySpark Programming Guide](https://spark.apache.org/docs/latest/api/python/index.html)
+- [Azure Cloud Documentation](https://docs.microsoft.com/en-us/azure/)
+- [Dijkstra's Algorithm Details](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm)
 
-## About This Project
+## Project Context
 
-This project was implemented as part of the assignment "Implementing Dijkstra's Algorithm with Apache Spark on Azure VMs." It demonstrates the use of distributed computing techniques for graph processing algorithms.
+This implementation fulfills the requirements for the "Implementing Dijkstra's Algorithm with Apache Spark on Azure VMs" assignment, demonstrating cloud-based distributed graph processing.
